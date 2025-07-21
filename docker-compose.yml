@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # OpenSearch ノード1（マスター兼データノード）
+  opensearch-node1:
+    image: opensearchproject/opensearch:2.11.1
+    container_name: opensearch-node1
+    environment:
+      - cluster.name=${OPENSEARCH_CLUSTER_NAME:-opensearch-cluster}
+      - node.name=opensearch-node1
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2
+      - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}"
+      - "DISABLE_INSTALL_DEMO_CONFIG=${DISABLE_INSTALL_DEMO_CONFIG:-true}"
+      - "DISABLE_SECURITY_PLUGIN=${DISABLE_SECURITY_PLUGIN:-true}"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./Volumes/OpenSearch/Node1/usr/share/opensearch/data:/usr/share/opensearch/data
+    ports:
+      - "${OPENSEARCH_REST_PORT:-9200}:9200"
+      - "${OPENSEARCH_PERF_PORT:-9600}:9600"
+    networks:
+      - opensearch-net
+    restart: unless-stopped
+
+  # OpenSearch ノード2（データノード）
+  opensearch-node2:
+    image: opensearchproject/opensearch:2.11.1
+    container_name: opensearch-node2
+    environment:
+      - cluster.name=${OPENSEARCH_CLUSTER_NAME:-opensearch-cluster}
+      - node.name=opensearch-node2
+      - discovery.seed_hosts=opensearch-node1,opensearch-node2
+      - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}"
+      - "DISABLE_INSTALL_DEMO_CONFIG=${DISABLE_INSTALL_DEMO_CONFIG:-true}"
+      - "DISABLE_SECURITY_PLUGIN=${DISABLE_SECURITY_PLUGIN:-true}"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - ./Volumes/OpenSearch/Node2/usr/share/opensearch/data:/usr/share/opensearch/data
+    networks:
+      - opensearch-net
+    restart: unless-stopped
+
+  # OpenSearch Dashboards（Kibana相当）
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:2.11.1
+    container_name: opensearch-dashboards
+    ports:
+      - "${OPENSEARCH_DASHBOARDS_PORT:-5601}:5601"
+    expose:
+      - "5601"
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch-node1:9200","http://opensearch-node2:9200"]'
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: "${DISABLE_SECURITY_DASHBOARDS_PLUGIN:-true}"
+    volumes:
+      - ./Volumes/OpenSearchDashboards/usr/share/opensearch-dashboards/config:/usr/share/opensearch-dashboards/config
+      - ./Volumes/OpenSearchDashboards/usr/share/opensearch-dashboards/data:/usr/share/opensearch-dashboards/data
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch-node1
+      - opensearch-node2
+    restart: unless-stopped
+
+  # Logstash（ログ処理）
+  logstash:
+    image: opensearchproject/logstash-oss-with-opensearch-output-plugin:8.9.0
+    container_name: logstash
+    ports:
+      - "${LOGSTASH_BEATS_PORT:-5044}:5044"    # Beats input
+      - "${LOGSTASH_TCP_PORT:-5000}:5000"      # TCP input
+      - "${LOGSTASH_MONITORING_PORT:-9600}:9600" # Logstash monitoring (動的ポート対応)
+    volumes:
+      - ./Volumes/Logstash/usr/share/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
+      - ./Volumes/Logstash/usr/share/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+    environment:
+      LS_JAVA_OPTS: "${LOGSTASH_JAVA_OPTS:--Xmx256m -Xms256m}"
+      XPACK_MONITORING_ENABLED: "false"
+    networks:
+      - opensearch-net
+    depends_on:
+      - opensearch-node1
+      - opensearch-node2
+    restart: unless-stopped
+
+  # Filebeat（ログ収集）
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.9.0
+    container_name: filebeat
+    user: root
+    volumes:
+      - ./Volumes/Filebeat/usr/share/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
+      - ./Volumes/Filebeat/var/log/app:/var/log/app:ro,Z
+      - ./Volumes/Filebeat/var/lib/docker/containers:/var/lib/docker/containers:ro,Z
+      - ./Volumes/Filebeat/var/run/docker.sock:/var/run/docker.sock:ro,Z
+    environment:
+      - ELASTICSEARCH_HOST=opensearch-node1:9200
+      - LOGSTASH_HOST=logstash:5044
+      - FILEBEAT_LOG_LEVEL=${FILEBEAT_LOG_LEVEL:-info}
+    networks:
+      - opensearch-net
+    depends_on:
+      - logstash
+    restart: unless-stopped
+
+networks:
+  opensearch-net:
+    driver: bridge

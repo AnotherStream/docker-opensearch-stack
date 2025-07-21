@@ -1,0 +1,4 @@
+server.name: opensearch-dashboards 
+server.host: "0.0.0.0" 
+server.port: 5601 
+opensearch.hosts: ["http://opensearch-node1:9200", "http://opensearch-node2:9200"]
