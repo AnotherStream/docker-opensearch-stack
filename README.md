@@ -1,0 +1,2 @@
+# docker-opensearch-stack
+OpenSearchとOpenSearch DashboardsとLogstash、Filebeatを用いたサーバー構成
