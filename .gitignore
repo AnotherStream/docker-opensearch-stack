@@ -1,0 +1,298 @@
+# ==========================================
+# Docker Compose Related Files
+# ==========================================
+
+# Docker Compose override files
+docker-compose.override.yml
+docker-compose.override.yaml
+docker-compose.*.yml
+docker-compose.*.yaml
+
+# Docker Compose environment files
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.test
+.env.*.local
+
+# ==========================================
+# Docker Volumes and Data
+# ==========================================
+
+# Docker Compose volumes (persistent data)
+Volumes/
+Volumes/**/*
+
+# Docker build context
+.dockerignore
+
+# ==========================================
+# OpenSearch/Elasticsearch Specific
+# ==========================================
+
+# OpenSearch data directories
+data/
+logs/
+snapshots/
+
+# OpenSearch configuration backups
+*.bak
+*.backup
+
+# OpenSearch certificates and keys
+*.p12
+*.jks
+*.pem
+*.crt
+*.key
+
+# ==========================================
+# Logging and Monitoring
+# ==========================================
+
+# Log files
+*.log
+*.log.*
+logs/
+log/
+
+# Logstash temporary files
+.logstash_jdbc_last_run
+
+# Filebeat registry and state
+filebeat.yml.bak
+registry/
+data/registry/
+
+# Monitoring and metrics
+*.metrics
+nohup.out
+
+# ==========================================
+# Development and IDE Files
+# ==========================================
+
+# Claude Code
+.claude/
+
+# Visual Studio Code
+.vscode/
+.vscode-server/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.eclipse/
+.metadata/
+.project
+.classpath
+.settings/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ==========================================
+# OS Specific Files
+# ==========================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+nul
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ==========================================
+# Backup and Temporary Files
+# ==========================================
+
+# General backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.tmp
+*.temp
+*~
+.#*
+#*#
+
+# Archive files
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.tbz2
+*.tar.xz
+*.txz
+*.7z
+*.rar
+
+# ==========================================
+# Security and Credentials
+# ==========================================
+
+# Certificates and keys
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+
+# Credential files
+.credentials
+.password
+.secret
+secrets/
+credentials/
+
+# API keys and tokens
+.apikey
+.token
+
+# ==========================================
+# Performance and Debugging
+# ==========================================
+
+# Performance monitoring
+*.pid
+*.seed
+*.pid.lock
+*.heap
+*.hprof
+
+# Core dumps
+core.*
+vgcore.*
+
+# ==========================================
+# Build and Dependency Files
+# ==========================================
+
+# Node.js (if used for development tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Python (if used for scripts)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Java (if used for custom plugins)
+*.class
+*.jar
+*.war
+*.ear
+target/
+.gradle/
+build/
+
+# ==========================================
+# Cloud and Deployment
+# ==========================================
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Kubernetes
+*.kubeconfig
+
+# AWS
+.aws/
+
+# ==========================================
+# Miscellaneous
+# ==========================================
+
+# Editor temporary files
+.*.tmp
+.*.swp
+.*.swo
+
+# Test results
+test-results/
+coverage/
+.nyc_output/
+
+# Local configuration overrides
+local.yml
+local.yaml
+local.json
+local.conf
+
+# Documentation builds
+site/
+_site/

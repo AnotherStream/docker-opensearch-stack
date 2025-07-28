@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # OpenSearch ノード1（マスター兼データノード）
   opensearch-node1:
@@ -29,6 +27,12 @@ services:
     networks:
       - opensearch-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   # OpenSearch ノード2（データノード）
   opensearch-node2:
@@ -55,6 +59,12 @@ services:
     networks:
       - opensearch-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   # OpenSearch Dashboards（Kibana相当）
   opensearch-dashboards:
@@ -73,9 +83,17 @@ services:
     networks:
       - opensearch-net
     depends_on:
-      - opensearch-node1
-      - opensearch-node2
+      opensearch-node1:
+        condition: service_healthy
+      opensearch-node2:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
 
   # Logstash（ログ処理）
   logstash:
@@ -94,9 +112,17 @@ services:
     networks:
       - opensearch-net
     depends_on:
-      - opensearch-node1
-      - opensearch-node2
+      opensearch-node1:
+        condition: service_healthy
+      opensearch-node2:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9600/_node/stats || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   # Filebeat（ログ収集）
   filebeat:
@@ -115,8 +141,15 @@ services:
     networks:
       - opensearch-net
     depends_on:
-      - logstash
+      logstash:
+        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "filebeat test config || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
 
 networks:
   opensearch-net:
