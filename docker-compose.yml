@@ -12,6 +12,8 @@ services:
       - "OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}"
       - "DISABLE_INSTALL_DEMO_CONFIG=${DISABLE_INSTALL_DEMO_CONFIG:-true}"
       - "DISABLE_SECURITY_PLUGIN=${DISABLE_SECURITY_PLUGIN:-true}"
+      - "plugins.security.ssl.http.enabled=false"
+      - "plugins.security.ssl.transport.enabled=true"
     ulimits:
       memlock:
         soft: -1
@@ -28,7 +30,7 @@ services:
       - opensearch-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f -u ${OPENSEARCH_ADMIN_USERNAME:-admin}:${OPENSEARCH_ADMIN_PASSWORD:-admin} http://localhost:9200/_cluster/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -44,9 +46,11 @@ services:
       - discovery.seed_hosts=opensearch-node1,opensearch-node2
       - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
       - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmx512m}"
+      - "OPENSEARCH_JAVA_OPTS=${OPENSEARCH_JAVA_OPTS:--Xms512m -Xmax512m}"
       - "DISABLE_INSTALL_DEMO_CONFIG=${DISABLE_INSTALL_DEMO_CONFIG:-true}"
       - "DISABLE_SECURITY_PLUGIN=${DISABLE_SECURITY_PLUGIN:-true}"
+      - "plugins.security.ssl.http.enabled=false"
+      - "plugins.security.ssl.transport.enabled=true"
     ulimits:
       memlock:
         soft: -1
@@ -60,7 +64,7 @@ services:
       - opensearch-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f -u ${OPENSEARCH_ADMIN_USERNAME:-admin}:${OPENSEARCH_ADMIN_PASSWORD:-admin} http://localhost:9200/_cluster/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -76,6 +80,8 @@ services:
       - "5601"
     environment:
       OPENSEARCH_HOSTS: '["http://opensearch-node1:9200","http://opensearch-node2:9200"]'
+      OPENSEARCH_USERNAME: "${OPENSEARCH_ADMIN_USERNAME:-admin}"
+      OPENSEARCH_PASSWORD: "${OPENSEARCH_ADMIN_PASSWORD:-admin}"
       DISABLE_SECURITY_DASHBOARDS_PLUGIN: "${DISABLE_SECURITY_DASHBOARDS_PLUGIN:-true}"
     volumes:
       - ./Volumes/OpenSearchDashboards/usr/share/opensearch-dashboards/config:/usr/share/opensearch-dashboards/config
