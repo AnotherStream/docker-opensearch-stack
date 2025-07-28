@@ -40,7 +40,7 @@ curl "localhost:9200/_cat/indices?v"
 curl "localhost:9200/_nodes/stats?pretty"
 
 # Logstash monitoring
-curl "localhost:9600/_node/stats?pretty"
+curl "localhost:9601/_node/stats?pretty"
 
 # View health check logs
 docker-compose logs opensearch-node1 | grep health
@@ -116,7 +116,7 @@ The stack uses environment variables that can be set in `.env` file:
 |---------|-----|---------|
 | OpenSearch API | http://localhost:9200 | REST API and cluster operations |
 | OpenSearch Dashboards | http://localhost:5601 | Web UI for log analysis and visualization |
-| Logstash Monitoring | http://localhost:9600 | Logstash node stats and monitoring |
+| Logstash Monitoring | http://localhost:9601 | Logstash node stats and monitoring |
 
 ## Common Development Tasks
 
@@ -128,7 +128,7 @@ The stack uses environment variables that can be set in `.env` file:
 ### Modifying Pipeline Processing
 1. Edit `config/Logstash/logstash.conf` for filter modifications
 2. Restart Logstash: `docker-compose restart logstash`
-3. Monitor processing: `curl "localhost:9600/_node/stats/pipelines?pretty"`
+3. Monitor processing: `curl "localhost:9601/_node/stats/pipelines?pretty"`
 
 ### Environment Switching
 1. Create environment-specific .env files

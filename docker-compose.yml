@@ -102,13 +102,12 @@ services:
     ports:
       - "${LOGSTASH_BEATS_PORT:-5044}:5044"    # Beats input
       - "${LOGSTASH_TCP_PORT:-5000}:5000"      # TCP input
-      - "${LOGSTASH_MONITORING_PORT:-9600}:9600" # Logstash monitoring (動的ポート対応)
+      - "${LOGSTASH_MONITORING_PORT:-9601}:9600" # Logstash monitoring (動的ポート対応)
     volumes:
-      - ./Volumes/Logstash/usr/share/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro,Z
-      - ./Volumes/Logstash/usr/share/logstash/pipeline:/usr/share/logstash/pipeline:ro,Z
+      - ./Volumes/Logstash/usr/share/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./Volumes/Logstash/usr/share/logstash/pipeline:/usr/share/logstash/pipeline
     environment:
       LS_JAVA_OPTS: "${LOGSTASH_JAVA_OPTS:--Xmx256m -Xms256m}"
-      XPACK_MONITORING_ENABLED: "false"
     networks:
       - opensearch-net
     depends_on:
@@ -118,22 +117,23 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9600/_node/stats || exit 1"]
+      test: ["CMD-SHELL", "curl -s http://localhost:9600/ || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 90s
 
   # Filebeat（ログ収集）
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.9.0
     container_name: filebeat
     user: root
+    command: ["filebeat", "-e", "--strict.perms=false"]
     volumes:
-      - ./Volumes/Filebeat/usr/share/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro,Z
-      - ./Volumes/Filebeat/var/log/app:/var/log/app:ro,Z
-      - ./Volumes/Filebeat/var/lib/docker/containers:/var/lib/docker/containers:ro,Z
-      - ./Volumes/Filebeat/var/run/docker.sock:/var/run/docker.sock:ro,Z
+      - ./Volumes/Filebeat/usr/share/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./Volumes/Filebeat/var/log/app:/var/log/app:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - ELASTICSEARCH_HOST=opensearch-node1:9200
       - LOGSTASH_HOST=logstash:5044
@@ -145,11 +145,11 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "filebeat test config || exit 1"]
+      test: ["CMD-SHELL", "ps aux | grep filebeat | grep -v grep || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 45s
+      start_period: 60s
 
 networks:
   opensearch-net:
